@@ -154,6 +154,8 @@ exports.updateCourseDetails = asyncWrapper(async (req, res, next) => {
   }
 
   const { title, description, category, price, duration } = req.body;
+  console.log(req.boby);
+  
   const courseId = req.params.id;
 
   let course = await Course.findById(courseId);

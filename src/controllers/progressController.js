@@ -41,6 +41,8 @@ exports.enrollInCourse = asyncWrapper(async (req, res, next) => {
 exports.markModuleAsCompleted = asyncWrapper(async (req, res, next) => {
   const { courseId } = req.params;
   const { moduleIndex } = req.body;
+  console.log(req.boby);
+  
   const userId = req.user._id;
 
   if (moduleIndex === undefined) {

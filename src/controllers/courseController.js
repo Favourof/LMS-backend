@@ -129,7 +129,19 @@ exports.getAdminCourses = asyncWrapper(async (req, res, next) => {
 // Get Single Course
 exports.getCourse = asyncWrapper(async (req, res, next) => {
   const course = await Course.findById(req.params.id)
-    .populate("instructor", "email name firstname lastname")
+    .populate("instructor", "email name firstname lastname studentsEnrolled")
+    .populate({
+      path: "studentsEnrolled",
+      select: "email name firstname lastname", // Select the fields you want to include
+    })
+    .populate({
+      path: "feedback", // Assuming feedback is a field in the course schema
+      select: "comment rating user", // Select the fields you want to include in feedback
+      populate: {
+        path: "user", // Assuming user is a field in the feedback schema
+        select: "name firstname lastname", // Select the fields you want to include in user
+      },
+    })
     .lean();
   if (!course) return next(new AppError("Course not found", 404));
   res.status(200).json({ status: "success", course });
@@ -233,19 +245,25 @@ exports.updateSpecificModule = asyncWrapper(async (req, res, next) => {
 
   // If a new file is uploaded, update contentType & contentUrl with Firebase URL
   if (req.file) {
-    const uploadedUrl = await uploadToFirebase(req.file); // Upload to Firebase
+    try {
+      const uploadedUrl = await uploadToFirebase(req.file); // Upload to Firebase
 
-    course.modules[index].contentType = req.file.mimetype.startsWith("image/")
-      ? "image"
-      : req.file.mimetype.startsWith("video/")
-      ? "video"
-      : "audio";
+      let contentType = "text";
+      if (req.file.mimetype.startsWith("image/")) contentType = "image";
+      else if (req.file.mimetype.startsWith("video/")) contentType = "video";
+      else if (req.file.mimetype.startsWith("audio/")) contentType = "audio";
+      else if (req.file.mimetype === "application/pdf")
+        contentType = "document"; // PDF Support
 
-    course.modules[index].contentUrl = uploadedUrl; // Store Firebase URL
+      course.modules[index].contentType = contentType;
+      course.modules[index].contentUrl = uploadedUrl; // Store Firebase URL
+    } catch (error) {
+      console.error("File upload failed:", error);
+      return next(new AppError("File upload failed. Try again.", 500));
+    }
   }
 
   await course.save();
-
   console.log("Module updated successfully");
 
   res.status(200).json({

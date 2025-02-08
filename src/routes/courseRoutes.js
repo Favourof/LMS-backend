@@ -22,14 +22,14 @@ router.put(
   "/:id/modules",
   protect,
   restrictTo("admin"),
-  upload.array("files", 10),
+  upload.array("file", 10),
   addModulesToCourse
 );
 router.put(
   "/:id/module",
   protect,
   restrictTo("admin"),
-  upload.single("files"),
+  upload.single("file"),
   updateSpecificModule
 );
 

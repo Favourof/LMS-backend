@@ -11,11 +11,19 @@ const feedbackRoute = require("./src/routes/feedbackRoutes");
 // Initialize app
 const app = express();
 
+// Allow requests from your frontend domain
+const corsOptions = {
+  origin: 'https://lms-frontend-vert-omega.vercel.app', // Replace with your frontend domain
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
+
 // Middleware
 app.use(morgan("dev"));
 app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ limit: "100mb", extended: true }));
-app.use(cors());
+
 
 
 // routes

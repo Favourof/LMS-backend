@@ -9,7 +9,7 @@ process.on("uncaughtException", (err) => {
 });
 
 // MongoDB Connection URI
-const MONGO_URI = process.env.mongoURL || "mongodb://localhost:27017/lms";
+const MONGO_URI = process.env.mongoURL;
 
 let gfs; // Declare GridFS globally
 
